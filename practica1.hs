@@ -21,7 +21,8 @@ maxDelPar (a, b) =
         else b
 
 
--- Ejercicio 3:
+--Tipos enumerativos
+-- Ejercicio 1:
 data Dir  = Norte | Sur | Este | Oeste deriving (Show, Eq)
 
 --A
@@ -48,7 +49,7 @@ siguiente Norte = Este
 siguiente Este = Sur
 
 
---Ejercicio 4:
+--Ejercicio 2:
 data DiaDeSemana = Lunes | Martes | Miercoles | Jueves | Viernes | Sabado | Domingo deriving Show
 
 --A
@@ -82,7 +83,7 @@ estaEnElMedio Domingo = False
 estaEnElMedio d = True
 
 
--- Ejercicio 5:
+-- Ejercicio 3:
 
 --A
 negar :: Bool -> Bool
@@ -95,3 +96,22 @@ implica a b = True
 
 --C
 yTambien :: Bool -> Bool -> Bool
+yTambien True True = True
+yTambien a b = False
+
+--D
+oBien :: Bool -> Bool -> Bool
+oBien True False = True
+oBien False True = True
+oBien a b = False
+
+
+--Registros
+--Ejercicio 1:
+
+--A
+
+
+
+
+
