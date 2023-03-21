@@ -108,9 +108,34 @@ oBien a b = False
 
 --Registros
 --Ejercicio 1:
+data Persona = P String Int deriving Show
+               --Nombre Edad
 
---A
+yo :: Persona
+yo = P "Ignacio" 26
 
+otroYo :: Persona
+otroYo = P "Nacho" 30
+
+nombre :: Persona -> String
+nombre (P n e) = n
+
+edad :: Persona -> Int
+edad (P n e) = e
+
+crecer :: Persona -> Persona
+crecer (P n e) = P n (e+1)
+
+cambioDeNombre :: String -> Persona -> Persona
+cambioDeNombre n (P b e) = P n e
+
+esMayorQueLaOtra :: Persona -> Persona -> Bool
+esMayorQueLaOtra (P n e) (P n2 e2) = e > e2
+
+laQueEsMayor :: Persona -> Persona -> Persona
+laQueEsMayor (P n1 e1) (P n2 e2) = if esMayorQueLaOtra (P n1 e1) (P n2 e2)
+    then P n1 e1
+    else P n2 e2
 
 
 
