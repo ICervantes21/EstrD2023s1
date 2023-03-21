@@ -138,5 +138,35 @@ laQueEsMayor (P n1 e1) (P n2 e2) = if esMayorQueLaOtra (P n1 e1) (P n2 e2)
     else P n2 e2
 
 
+--Pokemon
+data TipoDePoke = Agua | Fuego | Planta deriving Show
+
+data Pokemon = Poke TipoDePoke Int deriving Show
+
+data Entrenador = Ent String [Pokemon]
+
+ash :: Entrenador
+ash = Ent "ash" [charmander, chicorita]
+
+gary :: Entrenador
+gary = Ent "gary" [charmander, chicorita]
+
+charmander :: Pokemon
+charmander = Poke Fuego 100 
+
+chicorita :: Pokemon
+chicorita = Poke Planta 100 
+
+superaA :: Pokemon -> Pokemon -> Bool
+superaA (Poke t1 n1) (Poke t2 n2) = esEfectivo t1 t2
+
+esEfectivo :: TipoDePoke -> TipoDePoke -> Bool
+esEfectivo Agua Fuego = True
+esEfectivo Fuego Planta = True
+esEfectivo Planta Agua = True
+esEfectivo a b = False
+
+
+
 
 
