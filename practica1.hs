@@ -1,10 +1,13 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use guards" #-}
+{-# HLINT ignore "Use camelCase" #-}
 import Text.XHtml (p)
 
 -- Ejercicio 1:
 --A:
 
 sucesor :: Int -> Int
-sucesor a = a - 1
+sucesor a = a + 1
 
 
 --B
@@ -23,14 +26,14 @@ maxDelPar (a, b) =
         else b
 
 -- Ejercicio 2
--- sucesor (sumar (maxDelPar (divisionYResto 10 5)) 9)
--- sumar (maxDelPar (divisionYResto 25 5)) (sucesor 6)
--- sumar (sucesor (maxDelPar (divisionYResto 49 7))) 4
--- sucesor (sumar (maxDelPar (divisionYResto 36 6)) 5)
+-- sucesor (sumar (maxDelPar (divisionYResto 10 5)) 7)
+-- sumar (maxDelPar (divisionYResto 25 5)) (sucesor 4)
+-- sumar (sucesor (maxDelPar (divisionYResto  16 4))) 5
+-- sucesor (sumar (maxDelPar (divisionYResto 36 6)) 3)
 
 --Tipos enumerativos
 -- Ejercicio 1:
-data Dir  = Norte | Sur | Este | Oeste deriving (Show, Eq)
+data Dir  = Norte | Sur | Este | Oeste deriving Show
 
 --A
 opuesto :: Dir -> Dir
@@ -54,6 +57,8 @@ siguiente :: Dir -> Dir
 --Precondicion: Dir no puede ser "Oeste"
 siguiente Norte = Este
 siguiente Este = Sur
+siguiente Sur = Oeste
+siguiente Oeste = error "No existe esa dirección"
 
 
 --Ejercicio 2:
@@ -94,23 +99,23 @@ estaEnElMedio d = True
 
 --A
 negar :: Bool -> Bool
-negar a = not a
+negar True = False
+negar _ = True
 
 --B
 implica :: Bool -> Bool -> Bool
-implica True False = False
-implica a b = True
+implica _ False = False
+implica _ _ = True
 
 --C
 yTambien :: Bool -> Bool -> Bool
 yTambien True True = True
-yTambien a b = False
+yTambien _ _ = False
 
 --D
 oBien :: Bool -> Bool -> Bool
-oBien True False = True
-oBien False True = True
-oBien a b = False
+oBien False False = False
+oBien _ _ = True
 
 
 --Registros
@@ -140,9 +145,9 @@ esMayorQueLaOtra :: Persona -> Persona -> Bool
 esMayorQueLaOtra (P n e) (P n2 e2) = e > e2
 
 laQueEsMayor :: Persona -> Persona -> Persona
-laQueEsMayor (P n1 e1) (P n2 e2) = if esMayorQueLaOtra (P n1 e1) (P n2 e2)
-    then P n1 e1
-    else P n2 e2
+laQueEsMayor p1 p2 = if esMayorQueLaOtra p1 p2
+    then p1
+    else p2
 
 
 --Pokemon
@@ -177,22 +182,15 @@ esEfectivo Planta Agua = True
 esEfectivo a b = False
 
 cantidadDePokemonDe :: TipoDePoke -> Entrenador -> Int
-cantidadDePokemonDe t (Ent n p1 p2)
-  | sonDelMismoTipo t p1 p2 = 2
-  | unoEsDeTipo t p1 p2 = 1
-  | otherwise = 0
+cantidadDePokemonDe t (Ent n p1 p2) =
+    unoSi_CeroSino (esDeTipo t p1) + unoSi_CeroSino (esDeTipo t p2)
 
 
-unoEsDeTipo :: TipoDePoke -> Pokemon -> Pokemon -> Bool
-unoEsDeTipo t (Poke x e) (Poke z e2) =
-     esDeTipo t (Poke x e) || esDeTipo t (Poke z e2)
+unoSi_CeroSino :: Bool -> Int
+unoSi_CeroSino a = if a
+    then 1
+    else 0
 
-sonDelMismoTipo :: TipoDePoke -> Pokemon -> Pokemon -> Bool
-sonDelMismoTipo t (Poke x e) (Poke z e2) =
-     esDeTipo t (Poke x e) && esDeTipo t (Poke z e2)
-
-tipoDe :: Pokemon -> TipoDePoke
-tipoDe (Poke t e) = t
 
 esDeTipo :: TipoDePoke -> Pokemon -> Bool
 esDeTipo Fuego (Poke Fuego e) = True
@@ -202,7 +200,10 @@ esDeTipo x z = False
 
 
 juntarPokemon :: (Entrenador, Entrenador) -> [Pokemon]
-juntarPokemon (Ent n p1 p2, Ent n2 p3 p4) = [p1, p2, p3, p4]
+juntarPokemon (e1, e2) = pokemonesDe e1 ++ pokemonesDe e2
+
+pokemonesDe :: Entrenador -> [Pokemon]
+pokemonesDe (Ent n p1 p2) = [p1, p2]
 
 
 --5: Funciones polimorficas
@@ -225,11 +226,14 @@ estaVacia [] = True
 estaVacia _ = False
 
 elPrimero :: [a] -> a
+--Precondición: La lista dada por el parámetro no es vacía
 elPrimero (x:_) = x
 
 sinElPrimero :: [a] -> [a]
-sinElPrimero (x:a) = a
+--Precondición: La lista dada por el parámetro no es vacía
+sinElPrimero (x:xs) = xs
 
 splitHead :: [a] -> (a, [a])
-splitHead (x:a) = (x, a)
+--Precondición: La lista dada por el parámetro no es vacía
+splitHead (x:xs) = (x, xs)
 
