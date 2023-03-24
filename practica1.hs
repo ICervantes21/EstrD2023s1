@@ -104,18 +104,18 @@ negar _ = True
 
 --B
 implica :: Bool -> Bool -> Bool
-implica _ False = False
-implica _ _ = True
+implica True a = a
+implica False a = True
 
 --C
 yTambien :: Bool -> Bool -> Bool
-yTambien True True = True
-yTambien _ _ = False
+yTambien True a = a
+yTambien False a = False
 
 --D
 oBien :: Bool -> Bool -> Bool
-oBien False False = False
-oBien _ _ = True
+oBien True a = True
+oBien False a = False
 
 
 --Registros
