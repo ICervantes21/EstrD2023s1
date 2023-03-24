@@ -115,7 +115,7 @@ yTambien False a = False
 --D
 oBien :: Bool -> Bool -> Bool
 oBien True a = True
-oBien False a = False
+oBien False a = a
 
 
 --Registros
