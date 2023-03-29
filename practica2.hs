@@ -1,6 +1,8 @@
 --Ejercicio 1
 --1
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# LANGUAGE BlockArguments #-}
+{-# HLINT ignore "Use camelCase" #-}
 import Data.ByteString (tails)
 import Distribution.Simple.Utils (xargs)
 {-# HLINT ignore "Use min" #-}
@@ -175,3 +177,98 @@ elMasViejo (x:xs) = if edad x == maximoDe (edadesDe (x:xs))
     then x
     else elMasViejo xs
 
+
+--Pokemon 2
+data TipoDePokemon = Agua | Fuego | Planta deriving Show
+data Pokemon = Poke TipoDePokemon Int deriving Show
+data Entrenador = Ent String [Pokemon] deriving Show
+
+ash :: Entrenador
+ash = Ent "ash" [charmander, mudkip, chicorita]
+
+gary :: Entrenador
+gary = Ent "gary" [chicorita, chicorita]
+
+charmander :: Pokemon
+charmander = Poke Fuego 100
+
+chicorita :: Pokemon
+chicorita = Poke Planta 100
+
+mudkip :: Pokemon
+mudkip = Poke Agua 100
+
+--1
+cantPokemon :: Entrenador -> Int
+cantPokemon (Ent n p) = longitud p
+
+--2
+cantPokemonDe :: TipoDePokemon -> Entrenador -> Int
+cantPokemonDe t e = pokemonesDeTipo t (pokemonesDe e)
+
+pokemonesDeTipo :: TipoDePokemon -> [Pokemon] -> Int
+pokemonesDeTipo _ [] = 0
+pokemonesDeTipo t (x:xs) = if esDeTipo t x
+    then 1 + pokemonesDeTipo t xs
+    else pokemonesDeTipo t xs
+
+esDeTipo :: TipoDePokemon -> Pokemon -> Bool
+esDeTipo Fuego (Poke Fuego e) = True
+esDeTipo Agua (Poke Agua k) = True
+esDeTipo Planta (Poke Planta j) = True
+esDeTipo x z = False
+
+pokemonesDe :: Entrenador -> [Pokemon]
+pokemonesDe (Ent n p) = p
+
+--3
+cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
+cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 =
+    cuantosPokemonesLeGananATodos (soloLosDeTipo t (pokemonesDe e1)) (pokemonesDe e2)
+
+superaA :: Pokemon -> Pokemon -> Bool
+superaA (Poke t1 n1) (Poke t2 n2) = esEfectivo t1 t2
+
+esEfectivo :: TipoDePokemon -> TipoDePokemon -> Bool
+esEfectivo Agua Fuego = True
+esEfectivo Fuego Planta = True
+esEfectivo Planta Agua = True
+esEfectivo a b = False
+
+cuantosPokemonesLeGananATodos :: [Pokemon] -> [Pokemon] -> Int
+cuantosPokemonesLeGananATodos _ [] = 0
+cuantosPokemonesLeGananATodos [] _ = 0
+cuantosPokemonesLeGananATodos (x:xs) pokes = 
+    if leGanaATodos x pokes
+        then 1 + cuantosPokemonesLeGananATodos xs pokes
+        else cuantosPokemonesLeGananATodos xs pokes
+
+aCuantosLeGana :: Pokemon -> [Pokemon] -> Int 
+aCuantosLeGana _ [] = 0    
+aCuantosLeGana p (x:xs) = if superaA p x
+    then 1 + aCuantosLeGana p xs
+    else aCuantosLeGana p xs
+
+leGanaATodos :: Pokemon -> [Pokemon] -> Bool
+leGanaATodos p pp = aCuantosLeGana p pp == longitud pp 
+
+soloLosDeTipo :: TipoDePokemon -> [Pokemon] -> [Pokemon]
+soloLosDeTipo _ [] = []
+soloLosDeTipo t (x:xs) = if esDeTipo t x
+    then x: soloLosDeTipo t xs
+    else soloLosDeTipo t xs
+
+--4
+esMaestroPokemon :: Entrenador -> Bool
+esMaestroPokemon e = poseePokemonDeTipo e Agua &&
+    poseePokemonDeTipo e Fuego && poseePokemonDeTipo e Planta
+
+poseePokemonDeTipo :: Entrenador -> TipoDePokemon -> Bool
+poseePokemonDeTipo e t = hayUnPokemonDe_En_ t (pokemonesDe e)
+
+hayUnPokemonDe_En_ :: TipoDePokemon -> [Pokemon] -> Bool
+hayUnPokemonDe_En_ t pokes = not (null (soloLosDeTipo t pokes))
+
+
+
+  
