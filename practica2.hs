@@ -3,8 +3,13 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# LANGUAGE BlockArguments #-}
 {-# HLINT ignore "Use camelCase" #-}
+{-# HLINT ignore "Use newtype instead of data" #-}
+{-# HLINT ignore "Eta reduce" #-}
 import Data.ByteString (tails)
 import Distribution.Simple.Utils (xargs)
+import Text.XHtml (p, enctype)
+import Prelude hiding (zip)
+
 {-# HLINT ignore "Use min" #-}
 {-# HLINT ignore "Use max" #-}
 {-# HLINT ignore "Use foldr" #-}
@@ -270,5 +275,100 @@ hayUnPokemonDe_En_ :: TipoDePokemon -> [Pokemon] -> Bool
 hayUnPokemonDe_En_ t pokes = not (null (soloLosDeTipo t pokes))
 
 
+--Roles
 
-  
+data Seniority = Junior | SemiSenior | Senior deriving Show
+data Proyecto = ConsProyecto String deriving (Show, Eq)
+data Rol = Developer Seniority Proyecto | Management Seniority Proyecto deriving Show
+data Empresa = ConsEmpresa [Rol] deriving Show
+
+empresa :: Empresa
+empresa = ConsEmpresa [Developer Junior proyecto1, Developer SemiSenior proyecto1, Developer Senior proyecto2]
+
+proyecto1 :: Proyecto
+proyecto1 = ConsProyecto "P1"
+
+proyecto2 :: Proyecto
+proyecto2 = ConsProyecto "P2"
+
+--1
+proyectos :: Empresa -> [Proyecto]
+proyectos (ConsEmpresa r) = sinRepetidos (proyectosDeRoles r)
+
+
+
+proyectosDeRoles :: [Rol] -> [Proyecto]
+proyectosDeRoles [] = []
+proyectosDeRoles (x:xs) = proyectosDe x: proyectosDeRoles xs
+
+proyectosDe :: Rol -> Proyecto
+proyectosDe (Developer _ x) = x
+proyectosDe (Management _ y) = y
+
+sinRepetidos :: Eq a => [a] -> [a]
+sinRepetidos [] = []
+sinRepetidos (x:xs) = if not (pertenece x xs)
+    then x:sinRepetidos xs
+    else sinRepetidos xs
+
+--2
+losDevSenior :: Empresa -> [Proyecto] -> Int
+losDevSenior (ConsEmpresa r) p = cuantosRolesDevSeniorEstanEn r p
+
+
+cuantosRolesDevSeniorEstanEn :: [Rol] -> [Proyecto] -> Int
+cuantosRolesDevSeniorEstanEn [] [] = 0
+cuantosRolesDevSeniorEstanEn (x:xs) (y:ys) = if elRolEsDevSeniorYEstaEn x y
+    then 1 + cuantosRolesDevSeniorEstanEn xs ys
+    else cuantosRolesDevSeniorEstanEn xs ys
+
+
+elRolEsDevSeniorYEstaEn :: Rol -> Proyecto -> Bool
+elRolEsDevSeniorYEstaEn (Developer Senior p) x = p == x
+elRolEsDevSeniorYEstaEn _ _ = False
+
+
+--3
+cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
+cantQueTrabajanEn p (ConsEmpresa r) = contarCoincidenciasEntre p r
+
+contarCoincidenciasEntre :: [Proyecto] -> [Rol] -> Int
+contarCoincidenciasEntre [] [] = 0
+contarCoincidenciasEntre (x:xs) (y:ys) = if elProyectoEstaEn x y 
+    then 1 + contarCoincidenciasEntre xs ys
+    else contarCoincidenciasEntre xs ys
+
+elProyectoEstaEn :: Proyecto -> Rol -> Bool
+elProyectoEstaEn p (Developer _ x) = p==x
+elProyectoEstaEn p (Management _ x) = p==x
+
+
+--4
+asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
+asignadosPorProyecto e = proyectoXEmpleados (proyectos e) (rolesDe e) 
+
+
+proyectoXEmpleados :: [Proyecto] -> [Rol] -> [(Proyecto, Int)]
+proyectoXEmpleados _ [] = []
+proyectoXEmpleados [] _ = []
+proyectoXEmpleados (x:xs) ys = (x, cuantosEmpleadosTiene x ys) : proyectoXEmpleados xs ys
+
+cuantosEmpleadosTiene :: Proyecto -> [Rol] -> Int
+cuantosEmpleadosTiene _ [] = 0
+cuantosEmpleadosTiene p (x:xs) = unoSiTieneEmpleado p x + cuantosEmpleadosTiene p xs
+
+
+unoSiTieneEmpleado :: Proyecto -> Rol -> Int
+unoSiTieneEmpleado p r = if elProyectoEstaEn p r
+    then 1
+    else 0
+
+rolesDe :: Empresa -> [Rol] 
+rolesDe (ConsEmpresa r) = r    
+
+
+zip :: [a] -> [b] -> [(a,b)]
+zip [] _ = []
+zip _ [] = []
+zip (x:xs) (y:ys) = (x,y) : zip xs ys
+
