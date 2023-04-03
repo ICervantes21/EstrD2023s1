@@ -143,8 +143,10 @@ losPrimeros n (x:xs) = x: losPrimeros (n - 1) xs
 
 --5
 sinLosPrimeros :: Int -> [a] -> [a]
-sinLosPrimeros 0 [e] = [e]
-sinLosPrimeros n (x:xs) = tail (x: sinLosPrimeros (n - 1) xs)
+sinLosPrimeros 0 a = a
+sinLosPrimeros n xs = if n < longitud xs
+    then tail (sinLosPrimeros (n - 1) xs)
+    else []
 
 
 --Registros
