@@ -364,7 +364,6 @@ asignadosPorProyecto e = proyectoXEmpleados (proyectos e) (rolesDe e)
 
 proyectoXEmpleados :: [Proyecto] -> [Rol] -> [(Proyecto, Int)]
 proyectoXEmpleados _ [] = []
-proyectoXEmpleados [] _ = []
 proyectoXEmpleados (x:xs) ys = (x, cuantosEmpleadosTiene x ys) : proyectoXEmpleados xs ys
 
 cuantosEmpleadosTiene :: Proyecto -> [Rol] -> Int
