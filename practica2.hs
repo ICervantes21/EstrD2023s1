@@ -91,8 +91,12 @@ reversa (x:xs) = agregarAlFinal (reversa xs) x
 
 --14
 zipMaximos :: [Int] -> [Int] -> [Int]
-zipMaximos [] [] = []
-zipMaximos (x:xs) (y:ys) = [maximoDe xs, maximoDe ys]
+zipMaximos n [] = n
+zipMaximos [] n = n
+zipMaximos (x:xs) (y:ys) = if x > y
+    then x : zipMaximos xs ys
+    else y : zipMaximos xs ys
+
 
 maximoDe :: [Int] -> Int
 --Próposito: Dada una lista de números enteros, retorna el maximo de esas lista.
