@@ -203,7 +203,7 @@ ash :: Entrenador
 ash = Ent "ash" [charmander, mudkip, chicorita]
 
 gary :: Entrenador
-gary = Ent "gary" [chicorita, chicorita]
+gary = Ent "gary" [chicorita]
 
 charmander :: Pokemon
 charmander = Poke Fuego 100
@@ -239,8 +239,11 @@ pokemonesDe (Ent n p) = p
 
 --3
 cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
-cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 =
-    cuantosPokemonesLeGananATodos (soloLosDeTipo t (pokemonesDe e1)) (pokemonesDe e2)
+cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 = 
+    if null (pokemonesDe e2)
+        then longitud (pokemonesDe e1)
+        else cuantosPokemonesLeGananATodos (soloLosDeTipo t (pokemonesDe e1)) (pokemonesDe e2)
+
 
 superaA :: Pokemon -> Pokemon -> Bool
 superaA (Poke t1 n1) (Poke t2 n2) = esEfectivo t1 t2
