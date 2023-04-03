@@ -5,6 +5,7 @@
 {-# HLINT ignore "Use camelCase" #-}
 {-# HLINT ignore "Use newtype instead of data" #-}
 {-# HLINT ignore "Eta reduce" #-}
+{-# HLINT ignore "Redundant bracket" #-}
 import Data.ByteString (tails)
 import Distribution.Simple.Utils (xargs)
 import Text.XHtml (p, enctype)
@@ -79,7 +80,9 @@ agregarAlFinal (x:xs) e = (x:xs)++[e]
 
 --12
 agregar :: [a] -> [a] -> [a]
-agregar (x:xs) (y:ys) = (x:xs) ++ (y:ys)
+agregar a [] = a
+agregar [] a = a
+agregar (x:xs) ys = x : agregar xs ys
 
 --13
 reversa :: [a] -> [a]
