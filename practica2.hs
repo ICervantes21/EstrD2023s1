@@ -126,7 +126,9 @@ factorial n = n * factorial (n - 1)
 --2
 cuentaRegresiva :: Int -> [Int]
 cuentaRegresiva 0 = []
-cuentaRegresiva n = n: cuentaRegresiva (n - 1)
+cuentaRegresiva n = if n > 0
+    then n: cuentaRegresiva (n - 1)
+    else []
 
 --3
 repetir :: Int -> a -> [a]
