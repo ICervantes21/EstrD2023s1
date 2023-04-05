@@ -45,7 +45,7 @@ data Objeto = Cacharro | Tesoro deriving Show
 data Camino = Fin | Cofre [Objeto] Camino | Nada Camino deriving Show
 
 camino :: Camino
-camino = Cofre [Cacharro] (Nada (Nada (Nada (Nada (Nada Fin)))))
+camino = Cofre [Tesoro] (Cofre [Tesoro] (Nada (Cofre [Tesoro] (Nada (Nada Fin)))))
 
 --1
 hayTesoro :: Camino -> Bool
@@ -74,6 +74,85 @@ pasosHastaTesoro (Cofre o c) = if hayTesoroAca o
     then 0
     else 1 + pasosHastaTesoro c
 
---3
---hayTesoroEn :: Int -> Camino -> Bool
 
+--3
+hayTesoroEn :: Int -> Camino -> Bool
+hayTesoroEn _ Fin = False
+hayTesoroEn n c = hayCofreAca (habitacionA n c) && hayTesoroAca (objetosDe (habitacionA n c))
+
+hayCofreAca :: Camino -> Bool
+hayCofreAca (Cofre _ _) = True
+hayCofreAca _ = False
+
+objetosDe :: Camino -> [Objeto]
+objetosDe (Cofre o c) = o
+
+habitacionA :: Int -> Camino -> Camino
+habitacionA _ Fin = Fin
+habitacionA 0 x = x
+habitacionA n (Nada c) = habitacionA (n - 1) c
+habitacionA n (Cofre o c) = habitacionA (n - 1) c
+
+--4
+alMenosNTesoros :: Int -> Camino -> Bool
+alMenosNTesoros n c = (cantidadDeTesorosEn c) >= n
+
+cantidadDeTesorosEn :: Camino -> Int
+cantidadDeTesorosEn Fin = 0
+cantidadDeTesorosEn (Nada c) = cantidadDeTesorosEn c
+cantidadDeTesorosEn (Cofre o c) = unoSi (hayTesoroAca o) + cantidadDeTesorosEn c
+
+--5
+cantTesorosEntre :: Int -> Int -> Camino -> Int
+cantTesorosEntre n1 n2 c = (cantidadDeTesorosEn (habitacionA n1 c)) - (cantidadDeTesorosEn (habitacionA n2 c))
+
+
+
+
+
+
+
+{-
+lista :: [a] -> ...
+lista [] = ...
+lista (x:xs) = ... x ... lista xs
+
+fun :: Camino -> ...
+fun Fin = ...
+fun c = ... c ... a c
+-}
+--clase martes
+data Tree a = EmptyT | NodeT a (Tree a) (Tree a) deriving Show
+
+arbol :: Tree String
+arbol = NodeT "a" 
+                  (NodeT "b" EmptyT EmptyT)
+                  (NodeT "d" EmptyT EmptyT)
+
+{-
+listPerLevel :: Tree a -> [[a]]
+listPerLevel EmptyT = []
+listPerLevel t = [elementosDeArbol t] 
+
+elementosDeArbol :: Tree a -> [a]
+elementosDeArbol EmptyT = []
+elementosDeArbol (NodeT a t1 t2) = a ++ elementosDeArbol t1 ++ elementosDeArbol t2
+-}
+--Clase:
+
+listPerLevel :: Tree a -> [[a]]
+listPerLevel EmptyT = []
+listPerLevel (NodeT x t1 t2) = [x] : juntarNiveles (listPerLevel t1)  (listPerLevel t2)  
+
+juntarNiveles :: [[a]] -> [[a]] -> [[a]]
+juntarNiveles [] [] = []
+--Tenemos que asumir que las ramas pueden medir diferente
+juntarNiveles xs [] = xs
+--juntarNiveler [] ys = ys
+juntarNiveles (x:xs) (y:ys) = (x++y) : juntarNiveles xs ys
+
+{-
+--Recprdar esta estructura para iniciar
+listPerLevel :: Tree a -> [[a]]
+listPerLevel = EmptyT =
+listPerLevel (NodeT x t1 t2) = ... x ... listPerLevel t1 ... listPerLevel t2 -}
