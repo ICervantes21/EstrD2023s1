@@ -1,6 +1,6 @@
+
 --1.1 Celdas con bolitas
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Redundant if" #-}
+
 
 data Color = Azul | Rojo deriving Show
 data Celda = Bolita Color Celda | CeldaVacia deriving Show
@@ -110,8 +110,6 @@ cantTesorosEntre n1 n2 c = (cantidadDeTesorosEn (habitacionA n1 c)) - (cantidadD
 
 
 
-
-
 {-
 lista :: [a] -> ...
 lista [] = ...
@@ -121,25 +119,99 @@ fun :: Camino -> ...
 fun Fin = ...
 fun c = ... c ... a c
 -}
---clase martes
+--Arboles
 data Tree a = EmptyT | NodeT a (Tree a) (Tree a) deriving Show
 
-arbol :: Tree String
-arbol = NodeT "a" 
-                  (NodeT "b" EmptyT EmptyT)
-                  (NodeT "d" EmptyT EmptyT)
+arbol :: Tree Int
+arbol = NodeT 1 
+                  (NodeT 5 
+                          (NodeT 10 EmptyT EmptyT)
+                          (NodeT 10 EmptyT EmptyT))
+                  (NodeT 5 
+                          (NodeT 10 EmptyT EmptyT)
+                          (NodeT 10 EmptyT EmptyT))
 
-{-
-listPerLevel :: Tree a -> [[a]]
-listPerLevel EmptyT = []
-listPerLevel t = [elementosDeArbol t] 
+--1
+sumarT :: Tree Int -> Int
+sumarT t = sumatoria (elementosDeArbol t)
+
+sumatoria :: [Int] -> Int
+sumatoria [] = 0
+sumatoria (x:xs) = x + sumatoria xs
 
 elementosDeArbol :: Tree a -> [a]
 elementosDeArbol EmptyT = []
-elementosDeArbol (NodeT a t1 t2) = a ++ elementosDeArbol t1 ++ elementosDeArbol t2
--}
---Clase:
+elementosDeArbol (NodeT a t1 t2) = a : elementosDeArbol t1 ++ elementosDeArbol t2
 
+--2
+sizeT :: Tree a -> Int
+sizeT t = longitud (elementosDeArbol t)
+
+longitud :: [a] -> Int
+longitud [] = 0
+longitud (x:xs) = 1 + longitud xs
+
+--3
+mapDobleT :: Tree Int -> Tree Int
+mapDobleT EmptyT = EmptyT
+mapDobleT (NodeT x t1 t2) = (NodeT (x*2) (mapDobleT t1) (mapDobleT t2))
+
+
+--4
+perteneceT :: Eq a => a -> Tree a -> Bool
+perteneceT a t = pertenece a (elementosDeArbol t)
+
+
+pertenece :: Eq a => a -> [a] -> Bool
+pertenece e [] = False
+pertenece e (x:xs) = e == x || pertenece e xs
+
+--5
+aparicionesT :: Eq a => a -> Tree a -> Int
+aparicionesT a t = apariciones a (elementosDeArbol t)
+
+apariciones :: Eq a => a -> [a] -> Int
+apariciones e [] = 0
+apariciones e (x:xs) = if e == x
+    then 1 + apariciones e xs
+    else apariciones e xs
+
+--6
+leaves :: Tree a -> [a] --La había realizado sin querer, se llama "elementosDeARbol"
+leaves EmptyT = []
+leaves (NodeT a t1 t2) = a : elementosDeArbol t1 ++ elementosDeArbol t2
+
+--7
+heightT :: Tree a -> Int
+heightT EmptyT = 0
+heightT (NodeT x t1 t2) = maxDelPar (1 + heightT t1, 1 + heightT t2)
+
+maxDelPar :: (Int,Int) -> Int
+maxDelPar (a, b) =
+    if a > b
+        then a
+        else b
+
+
+--8
+mirrorT :: Tree a -> Tree a
+mirrorT EmptyT = EmptyT
+mirrorT (NodeT a t1 t2) = (NodeT a t2 t1)
+
+--9
+toList :: Tree a -> [a]
+toList EmptyT = []
+toList (NodeT a t1 t2) = (leaves t1) ++ [a] ++ leaves t2
+
+--10
+levelN :: Int -> Tree a -> [a]
+levelN 0 (NodeT a t1 t2) = [a]
+levelN _ EmptyT = []
+levelN n (NodeT a t1 t2) = levelN (n-1) t1 ++ levelN (n-1) t2 
+
+
+
+--11
 listPerLevel :: Tree a -> [[a]]
 listPerLevel EmptyT = []
 listPerLevel (NodeT x t1 t2) = [x] : juntarNiveles (listPerLevel t1)  (listPerLevel t2)  
@@ -148,8 +220,58 @@ juntarNiveles :: [[a]] -> [[a]] -> [[a]]
 juntarNiveles [] [] = []
 --Tenemos que asumir que las ramas pueden medir diferente
 juntarNiveles xs [] = xs
---juntarNiveler [] ys = ys
 juntarNiveles (x:xs) (y:ys) = (x++y) : juntarNiveles xs ys
+
+
+--12
+ramaMasLarga :: Tree a -> [a]
+ramaMasLarga (NodeT a t1 t2)= if sizeT t1 > sizeT t2
+    then leaves t1
+    else leaves t2
+
+--13
+todosLosCaminos :: Tree a -> [[a]]
+todosLosCaminos EmptyT = []
+todosLosCaminos (NodeT a t1 t2) = ([leaves t1]++[leaves t2])
+
+
+--expresiones aritméticas
+data ExpA = Valor Int | Sum ExpA ExpA | Prod ExpA ExpA | Neg ExpA deriving Show
+
+operacion :: ExpA
+operacion = Prod (Valor 3) (Valor 0)
+
+--1
+eval :: ExpA -> Int
+eval (Valor n) = n
+eval (Sum x y) = eval x + eval y
+eval (Prod x y) = eval x * eval y
+eval (Neg x) = eval x * (-1)
+
+--2
+simplificar :: ExpA -> ExpA
+simplificar (Sum x y) = simSuma x y
+simplificar (Prod x y) = simProd x y
+simplificar (Neg x) = simNeg x 
+simplificar (Valor n) = Valor n
+
+simSuma :: ExpA -> ExpA -> ExpA
+simSuma x (Valor 0) = x
+simSuma (Valor 0) x = x
+simSuma x y = Sum x y
+
+
+simProd :: ExpA -> ExpA -> ExpA
+simProd x (Valor 0) = (Valor 0)
+simProd (Valor 0) x = (Valor 0)
+simProd x (Valor 1) = x
+simProd (Valor 1) x = x
+simProd x y = Prod x y
+
+simNeg :: ExpA -> ExpA
+simNeg (Neg x) = x
+simNeg x = (Neg x)
+
 
 {-
 --Recprdar esta estructura para iniciar
