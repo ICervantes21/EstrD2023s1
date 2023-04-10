@@ -239,9 +239,7 @@ pokemonesDe (Ent n p) = p
 --3
 cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
 cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 = 
-    if null (pokemonesDe e2)
-        then longitud (pokemonesDe e1)
-        else cuantosPokemonesLeGananATodos (soloLosDeTipo t (pokemonesDe e1)) (pokemonesDe e2)
+    cuantosPokemonesLeGananATodos (soloLosDeTipo t (pokemonesDe e1)) (pokemonesDe e2)
 
 
 superaA :: Pokemon -> Pokemon -> Bool
@@ -254,8 +252,8 @@ esEfectivo Planta Agua = True
 esEfectivo a b = False
 
 cuantosPokemonesLeGananATodos :: [Pokemon] -> [Pokemon] -> Int
-cuantosPokemonesLeGananATodos _ [] = 0
 cuantosPokemonesLeGananATodos [] _ = 0
+cuantosPokemonesLeGananATodos p [] = longitud p
 cuantosPokemonesLeGananATodos (x:xs) pokes = 
     if leGanaATodos x pokes
         then 1 + cuantosPokemonesLeGananATodos xs pokes
