@@ -75,12 +75,12 @@ lasDeLongitudMayorA n (x:xs) = if longitud x > n
 
 --11
 agregarAlFinal :: [a] -> a -> [a]
-agregarAlFinal [] a = [a]
-agregarAlFinal (x:xs) a = (x: agregarAlFinal xs a)
+agregarAlFinal [] x = [x]
+agregarAlFinal (x:xs) y = x: agregarAlFinal xs y
 
 --12
 agregar :: [a] -> [a] -> [a]
-agregar [] a = a
+agregar [] ys = ys
 agregar (x:xs) ys = x : agregar xs ys
 
 --13
@@ -142,7 +142,7 @@ losPrimeros n (x:xs) = x: losPrimeros (n - 1) xs
 
 --5
 sinLosPrimeros :: Int -> [a] -> [a]
-sinLosPrimeros 0 a = a
+sinLosPrimeros 0 xs = xs
 sinLosPrimeros n xs = if n < longitud xs
     then tail (sinLosPrimeros (n - 1) xs)
     else []
@@ -199,7 +199,7 @@ data Pokemon = Poke TipoDePokemon Int deriving Show
 data Entrenador = Ent String [Pokemon] deriving Show
 
 ash :: Entrenador
-ash = Ent "ash" [charmander, mudkip, chicorita]
+ash = Ent "ash" []
 
 gary :: Entrenador
 gary = Ent "gary" [chicorita]
@@ -253,7 +253,6 @@ esEfectivo a b = False
 
 cuantosPokemonesLeGananATodos :: [Pokemon] -> [Pokemon] -> Int
 cuantosPokemonesLeGananATodos [] _ = 0
-cuantosPokemonesLeGananATodos p [] = longitud p
 cuantosPokemonesLeGananATodos (x:xs) pokes = 
     if leGanaATodos x pokes
         then 1 + cuantosPokemonesLeGananATodos xs pokes
