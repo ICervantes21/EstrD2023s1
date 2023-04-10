@@ -75,12 +75,11 @@ lasDeLongitudMayorA n (x:xs) = if longitud x > n
 
 --11
 agregarAlFinal :: [a] -> a -> [a]
-agregarAlFinal [] e = [e]
-agregarAlFinal (x:xs) e = (x:xs)++[e]
+agregarAlFinal [] a = [a]
+agregarAlFinal (x:xs) a = (x: agregarAlFinal xs a)
 
 --12
 agregar :: [a] -> [a] -> [a]
-agregar a [] = a
 agregar [] a = a
 agregar (x:xs) ys = x : agregar xs ys
 
