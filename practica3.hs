@@ -65,7 +65,7 @@ pasosHastaTesoro :: Camino -> Int
 --Precondición: tiene que haber al menos un tesoro.
 pasosHastaTesoro Fin = error "No hay tesoro en el camino"
 pasosHastaTesoro (Nada c) = 1 + pasosHastaTesoro c
-pasosHastaTesoro (Cofre o c) = if hayTesoroAca o 
+pasosHastaTesoro (Cofre o c) = if hayTesoroAca o
     then 0
     else 1 + pasosHastaTesoro c
 
@@ -124,18 +124,26 @@ fun c = ... c ... a c
 data Tree a = EmptyT | NodeT a (Tree a) (Tree a) deriving Show
 
 arbol :: Tree Int
-arbol = NodeT 1 
-                  (NodeT 5 
+arbol = NodeT 1
+                  (NodeT 4
+                          (NodeT 2
+                                   (NodeT 20 EmptyT EmptyT)
+                                   (NodeT 10 EmptyT EmptyT))
+                            EmptyT)
+                  (NodeT 5
                           (NodeT 10 EmptyT EmptyT)
                           (NodeT 10 EmptyT EmptyT))
-                  (NodeT 5 
-                          (NodeT 10 EmptyT EmptyT)
-                          (NodeT 10 EmptyT EmptyT))
+                                    --NodeT 20 EmptyT EmptyT
+
+
+{-(NodeT 4 
+                          (NodeT 2 EmptyT EmptyT)
+                          (NodeT 10 EmptyT EmptyT))-}
 
 --1
 sumarT :: Tree Int -> Int
 sumarT EmptyT = 0
-sumarT (NodeT x t1 t2) = x + sumarT t1 + sumarT t2 
+sumarT (NodeT x t1 t2) = x + sumarT t1 + sumarT t2
 
 
 elementosDeArbol :: Tree a -> [a]
@@ -190,43 +198,56 @@ maxDelPar (a, b) =
 --8
 mirrorT :: Tree a -> Tree a
 mirrorT EmptyT = EmptyT
-mirrorT (NodeT a t1 t2) = (NodeT a t2 t1)
+mirrorT (NodeT a t1 t2) = NodeT a (mirrorT t2) (mirrorT t1)
 
 --9
 toList :: Tree a -> [a]
 toList EmptyT = []
-toList (NodeT a t1 t2) = (leaves t1) ++ [a] ++ leaves t2
+toList (NodeT a t1 t2) = elementosDeArbol t1 ++ [a] ++ elementosDeArbol t2
 
 --10
 levelN :: Int -> Tree a -> [a]
 levelN 0 (NodeT a t1 t2) = [a]
 levelN _ EmptyT = []
-levelN n (NodeT a t1 t2) = levelN (n-1) t1 ++ levelN (n-1) t2 
+levelN n (NodeT a t1 t2) = levelN (n-1) t1 ++ levelN (n-1) t2
 
 
 
 --11
 listPerLevel :: Tree a -> [[a]]
 listPerLevel EmptyT = []
-listPerLevel (NodeT x t1 t2) = [x] : juntarNiveles (listPerLevel t1)  (listPerLevel t2)  
+listPerLevel (NodeT x t1 t2) = [x] : juntarNiveles (listPerLevel t1)  (listPerLevel t2)
 
 juntarNiveles :: [[a]] -> [[a]] -> [[a]]
-juntarNiveles [] [] = []
 --Tenemos que asumir que las ramas pueden medir diferente
 juntarNiveles xs [] = xs
+juntarNiveles [] ys = ys
 juntarNiveles (x:xs) (y:ys) = (x++y) : juntarNiveles xs ys
 
 
 --12
 ramaMasLarga :: Tree a -> [a]
-ramaMasLarga (NodeT a t1 t2)= if sizeT t1 > sizeT t2
-    then leaves t1
-    else leaves t2
+ramaMasLarga EmptyT = []
+ramaMasLarga (NodeT x t1 t2) = if sizeT t1 >= sizeT t2
+    then x : ramaMasLarga t1
+    else x : ramaMasLarga t2
 
 --13
 todosLosCaminos :: Tree a -> [[a]]
 todosLosCaminos EmptyT = []
-todosLosCaminos (NodeT a t1 t2) = ([leaves t1]++[leaves t2])
+todosLosCaminos (NodeT x t1 t2) =
+    [x : recorrerRamaSuperior t1] ++ [x : recorrerRamaInferior t1]++
+    [x : recorrerRamaSuperior t2] ++ [x : recorrerRamaInferior t2]
+
+recorrerRamaSuperior :: Tree a -> [a]
+recorrerRamaSuperior EmptyT = []
+recorrerRamaSuperior (NodeT x t1 t2) = x : recorrerRamaSuperior t1
+
+recorrerRamaInferior :: Tree a -> [a]
+recorrerRamaInferior EmptyT = []
+recorrerRamaInferior (NodeT x t1 t2) = x : recorrerRamaInferior t2
+
+
 
 
 --expresiones aritméticas
@@ -246,7 +267,7 @@ eval (Neg x) = eval x * (-1)
 simplificar :: ExpA -> ExpA
 simplificar (Sum x y) = simSuma x y
 simplificar (Prod x y) = simProd x y
-simplificar (Neg x) = simNeg x 
+simplificar (Neg x) = simNeg x
 simplificar (Valor n) = Valor n
 
 simSuma :: ExpA -> ExpA -> ExpA
@@ -256,15 +277,15 @@ simSuma x y = Sum x y
 
 
 simProd :: ExpA -> ExpA -> ExpA
-simProd x (Valor 0) = (Valor 0)
-simProd (Valor 0) x = (Valor 0)
+simProd x (Valor 0) = Valor 0
+simProd (Valor 0) x = Valor 0
 simProd x (Valor 1) = x
 simProd (Valor 1) x = x
 simProd x y = Prod x y
 
 simNeg :: ExpA -> ExpA
 simNeg (Neg x) = x
-simNeg x = (Neg x)
+simNeg x = Neg x
 
 
 {-
