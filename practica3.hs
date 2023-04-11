@@ -1,8 +1,4 @@
-
 --1.1 Celdas con bolitas
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Redundant bracket" #-}
-{-# HLINT ignore "Use foldr" #-}
 
 
 data Color = Azul | Rojo deriving Show
@@ -138,11 +134,9 @@ arbol = NodeT 1
 
 --1
 sumarT :: Tree Int -> Int
-sumarT t = sumatoria (elementosDeArbol t)
+sumarT EmptyT = 0
+sumarT (NodeT x t1 t2) = x + sumarT t1 + sumarT t2 
 
-sumatoria :: [Int] -> Int
-sumatoria [] = 0
-sumatoria (x:xs) = x + sumatoria xs
 
 elementosDeArbol :: Tree a -> [a]
 elementosDeArbol EmptyT = []
@@ -150,11 +144,10 @@ elementosDeArbol (NodeT a t1 t2) = a : elementosDeArbol t1 ++ elementosDeArbol t
 
 --2
 sizeT :: Tree a -> Int
-sizeT t = longitud (elementosDeArbol t)
+sizeT EmptyT = 0
+sizeT (NodeT x t1 t2) = 1 + sizeT t1 + sizeT t2
 
-longitud :: [a] -> Int
-longitud [] = 0
-longitud (x:xs) = 1 + longitud xs
+
 
 --3
 mapDobleT :: Tree Int -> Tree Int
@@ -164,22 +157,18 @@ mapDobleT (NodeT x t1 t2) = (NodeT (x*2) (mapDobleT t1) (mapDobleT t2))
 
 --4
 perteneceT :: Eq a => a -> Tree a -> Bool
-perteneceT a t = pertenece a (elementosDeArbol t)
+perteneceT x EmptyT = False
+perteneceT y (NodeT x t1 t2) = y == x || (perteneceT y t1 || perteneceT y t2)
 
-
-pertenece :: Eq a => a -> [a] -> Bool
-pertenece e [] = False
-pertenece e (x:xs) = e == x || pertenece e xs
 
 --5
 aparicionesT :: Eq a => a -> Tree a -> Int
-aparicionesT a t = apariciones a (elementosDeArbol t)
+aparicionesT x EmptyT = 0
+aparicionesT y (NodeT x t1 t2) = if y == x
+    then 1 + aparicionesT y t1 + aparicionesT y t2
+    else aparicionesT y t1 + aparicionesT y t2
 
-apariciones :: Eq a => a -> [a] -> Int
-apariciones e [] = 0
-apariciones e (x:xs) = if e == x
-    then 1 + apariciones e xs
-    else apariciones e xs
+
 
 --6
 leaves :: Tree a -> [a] --La había realizado sin querer, se llama "elementosDeARbol"
