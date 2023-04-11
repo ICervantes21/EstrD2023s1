@@ -1,5 +1,8 @@
 
 --1.1 Celdas con bolitas
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Redundant bracket" #-}
+{-# HLINT ignore "Use foldr" #-}
 
 
 data Color = Azul | Rojo deriving Show
@@ -45,21 +48,17 @@ data Objeto = Cacharro | Tesoro deriving Show
 data Camino = Fin | Cofre [Objeto] Camino | Nada Camino deriving Show
 
 camino :: Camino
-camino = Cofre [Tesoro] (Cofre [Tesoro] (Nada (Cofre [Tesoro] (Nada (Nada Fin)))))
+camino = Nada (Cofre [Tesoro] (Cofre [Tesoro,Tesoro,Cacharro] (Nada Fin)))
 
 --1
 hayTesoro :: Camino -> Bool
 hayTesoro Fin = False
 hayTesoro (Nada c) = hayTesoro c
-hayTesoro (Cofre o c) = if hayTesoroAca o 
-    then True
-    else hayTesoro c
+hayTesoro (Cofre o c) = hayTesoroAca o || hayTesoro c
 
 hayTesoroAca :: [Objeto] -> Bool
 hayTesoroAca [] = False
-hayTesoroAca (x:xs) = if esTesoro x
-    then True
-    else hayTesoroAca xs
+hayTesoroAca (x:xs) = esTesoro x || hayTesoroAca xs
 
 esTesoro :: Objeto -> Bool
 esTesoro Tesoro = True
@@ -100,7 +99,13 @@ alMenosNTesoros n c = (cantidadDeTesorosEn c) >= n
 cantidadDeTesorosEn :: Camino -> Int
 cantidadDeTesorosEn Fin = 0
 cantidadDeTesorosEn (Nada c) = cantidadDeTesorosEn c
-cantidadDeTesorosEn (Cofre o c) = unoSi (hayTesoroAca o) + cantidadDeTesorosEn c
+cantidadDeTesorosEn (Cofre o c) = cantTesorosEnCofre o + cantidadDeTesorosEn c
+
+cantTesorosEnCofre :: [Objeto] -> Int
+cantTesorosEnCofre [] = 0
+cantTesorosEnCofre (x:xs) = if esTesoro x
+    then 1 + cantTesorosEnCofre xs
+    else cantTesorosEnCofre xs
 
 --5
 cantTesorosEntre :: Int -> Int -> Camino -> Int
