@@ -219,7 +219,15 @@ mirrorT (NodeT a t1 t2) = NodeT a (mirrorT t2) (mirrorT t1)
 --9
 toList :: Tree a -> [a]
 toList EmptyT = []
-toList (NodeT a t1 t2) = elementosDeArbol t1 ++ [a] ++ elementosDeArbol t2
+toList (NodeT a t1 t2) = reversa (elementosDeArbol t1) ++ [a] ++ elementosDeArbol t2
+
+reversa :: [a] -> [a]
+reversa [] = []
+reversa (x:xs) = agregarAlFinal (reversa xs) x
+
+agregarAlFinal :: [a] -> a -> [a]
+agregarAlFinal [] x = [x]
+agregarAlFinal (x:xs) y = x: agregarAlFinal xs y
 
 --10
 levelN :: Int -> Tree a -> [a]
