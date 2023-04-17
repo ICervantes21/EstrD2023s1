@@ -131,8 +131,8 @@ arbol = NodeT 1
                                    (NodeT 10 EmptyT EmptyT))
                             EmptyT)
                   (NodeT 5
-                          (NodeT 10 EmptyT EmptyT)
-                          (NodeT 10 EmptyT EmptyT))
+                          (NodeT 12 EmptyT EmptyT)
+                          (NodeT 11 EmptyT EmptyT))
                                     --NodeT 20 EmptyT EmptyT
 
 
@@ -181,7 +181,18 @@ aparicionesT y (NodeT x t1 t2) = if y == x
 --6
 leaves :: Tree a -> [a] --La había realizado sin querer, se llama "elementosDeARbol"
 leaves EmptyT = []
-leaves (NodeT a t1 t2) = a : elementosDeArbol t1 ++ elementosDeArbol t2
+leaves (NodeT a EmptyT EmptyT) = [a]
+leaves (NodeT a t1 t2) = if not (esHoja t1)
+    then leaves t1 ++ leaves t2
+    else elementoDelArbol t1 : leaves t2
+
+elementoDelArbol :: Tree a -> a
+elementoDelArbol (NodeT a t1 t2) = a
+elementoDelArbol _ = error ""
+
+esHoja :: Tree a -> Bool
+esHoja (NodeT a EmptyT EmptyT) = True
+esHoja _ = False
 
 --7
 heightT :: Tree a -> Int
