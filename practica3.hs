@@ -1,4 +1,9 @@
 --1.1 Celdas con bolitas
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use foldr" #-}
+{-# HLINT ignore "Use camelCase" #-}
+{-# HLINT ignore "Use :" #-}
+{-# HLINT ignore "Redundant bracket" #-}
 
 
 data Color = Azul | Rojo deriving Show
@@ -132,8 +137,8 @@ arbol = NodeT 1
                             EmptyT)
                   (NodeT 5
                           (NodeT 12 EmptyT EmptyT)
-                          (NodeT 11 EmptyT EmptyT))
-                                    --NodeT 20 EmptyT EmptyT
+                          (NodeT 11 EmptyT (
+                                           NodeT 20 EmptyT EmptyT)))
 
 
 {-(NodeT 4 
@@ -239,25 +244,33 @@ juntarNiveles (x:xs) (y:ys) = (x++y) : juntarNiveles xs ys
 --12
 ramaMasLarga :: Tree a -> [a]
 ramaMasLarga EmptyT = []
-ramaMasLarga (NodeT x t1 t2) = if sizeT t1 >= sizeT t2
+ramaMasLarga (NodeT x t1 t2) = if tieneMasElementos_Que_ t1 t2
     then x : ramaMasLarga t1
     else x : ramaMasLarga t2
+
+tieneMasElementos_Que_ :: Tree a -> Tree a -> Bool
+tieneMasElementos_Que_ t1 t2 =
+    longitud (elementosDeArbol t1) > longitud (elementosDeArbol t2)
+
+longitud :: [a] -> Int
+longitud [] = 0
+longitud (x:xs) = 1 + longitud xs
+
 
 --13
 todosLosCaminos :: Tree a -> [[a]]
 todosLosCaminos EmptyT = []
 todosLosCaminos (NodeT x t1 t2) =
-    [x : recorrerRamaSuperior t1] ++ [x : recorrerRamaInferior t1]++
-    [x : recorrerRamaSuperior t2] ++ [x : recorrerRamaInferior t2]
+     [x] : sucesionesDesde x (todosLosCaminos t1)
+     ++ sucesionesDesde x (todosLosCaminos t2)
 
-recorrerRamaSuperior :: Tree a -> [a]
-recorrerRamaSuperior EmptyT = []
-recorrerRamaSuperior (NodeT x t1 t2) = x : recorrerRamaSuperior t1
+sucesionesDesde :: a -> [[a]] -> [[a]]
+sucesionesDesde x [] = []
+sucesionesDesde e (xs:xss) = [cons e xs] ++ sucesionesDesde e xss
 
-recorrerRamaInferior :: Tree a -> [a]
-recorrerRamaInferior EmptyT = []
-recorrerRamaInferior (NodeT x t1 t2) = x : recorrerRamaInferior t2
-
+cons :: a -> [a] -> [a]
+cons x [] = [x]
+cons e (xs) = (e:xs)
 
 
 
