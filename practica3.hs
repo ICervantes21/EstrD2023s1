@@ -252,13 +252,11 @@ juntarNiveles (x:xs) (y:ys) = (x++y) : juntarNiveles xs ys
 --12
 ramaMasLarga :: Tree a -> [a]
 ramaMasLarga EmptyT = []
-ramaMasLarga (NodeT x t1 t2) = if tieneMasElementos_Que_ t1 t2
+ramaMasLarga (NodeT x t1 t2) = if longitud (ramaMasLarga t1) > longitud (ramaMasLarga t2)
     then x : ramaMasLarga t1
     else x : ramaMasLarga t2
 
-tieneMasElementos_Que_ :: Tree a -> Tree a -> Bool
-tieneMasElementos_Que_ t1 t2 =
-    longitud (elementosDeArbol t1) > longitud (elementosDeArbol t2)
+
 
 longitud :: [a] -> Int
 longitud [] = 0
