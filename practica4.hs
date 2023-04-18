@@ -1,4 +1,3 @@
-import Main (caminoAlTesoro)
 --Práctica 4
 
 --Pizzas
@@ -88,7 +87,8 @@ cofre2 :: Cofre
 cofre2 = Cofre [Chatarra, Chatarra]
 
 mapa :: Mapa
-mapa = Bifurcacion (cofre2) (Fin (cofre1)) (Fin (cofre2))
+mapa = Bifurcacion (cofre2) (Fin (cofre1)) (
+                            Bifurcacion (cofre2) (Fin (cofre1)) (Fin (cofre2)))
 
 --1
 hayTesoro :: Mapa -> Bool
@@ -123,6 +123,64 @@ esDerecha _ = False
 --3
 caminoAlTesoro :: Mapa -> [Dir]
 --Precondición: existe un tesoro y es único.
+caminoAlTesoro (Fin c) = []
 caminoAlTesoro (Bifurcacion c m1 m2) = if hayTesoro m1
     then Izq : caminoAlTesoro m1
     else Der : caminoAlTesoro m2
+
+
+--4
+caminoDeLaRamaMasLarga :: Mapa -> [Dir]
+caminoDeLaRamaMasLarga (Fin c) = []
+caminoDeLaRamaMasLarga (Bifurcacion c m1 m2) = 
+    if longitud (caminoDeLaRamaMasLarga m1) > longitud (caminoDeLaRamaMasLarga m2)
+        then Izq : caminoDeLaRamaMasLarga m1
+        else Der : caminoDeLaRamaMasLarga m2
+
+longitud :: [a] -> Int
+longitud [] = 0
+longitud (x:xs) = 1 + longitud xs
+
+--5
+tesorosPorNivel :: Mapa -> [[Objeto]]
+tesorosPorNivel (Fin c) = [tesorosDelCofre c]
+tesorosPorNivel (Bifurcacion c m1 m2) = 
+    tesorosDelCofre c : juntarNiveles (tesorosPorNivel m1) (tesorosPorNivel m2)
+
+juntarNiveles :: [[a]] -> [[a]] -> [[a]]
+--Tenemos que asumir que las ramas pueden medir diferente
+juntarNiveles xs [] = xs
+juntarNiveles [] ys = ys
+juntarNiveles (x:xs) (y:ys) = (x++y) : juntarNiveles xs ys
+
+
+tesorosDelCofre :: Cofre -> [Objeto]
+tesorosDelCofre (Cofre []) = []
+tesorosDelCofre (Cofre (x:xs)) = if esTesoro x
+    then x : tesorosDelCofre (Cofre xs)
+    else tesorosDelCofre (Cofre xs)
+
+--6
+todosLosCaminos :: Mapa -> [[Dir]]
+todosLosCaminos (Fin c) = []
+todosLosCaminos (Bifurcacion c m1 m2) = 
+    [Izq] : sucesionesDesde Izq (todosLosCaminos m1) ++ 
+    [Der] : sucesionesDesde Der (todosLosCaminos m2)
+
+sucesionesDesde :: a -> [[a]] -> [[a]]
+sucesionesDesde x [] = []
+sucesionesDesde e (xs:xss) = [cons e xs] ++ sucesionesDesde e xss    
+
+cons :: a -> [a] -> [a]
+cons x [] = [x]
+cons e (xs) = (e:xs)
+
+--3: Nave Espacial
+
+data Componente = LanzaTorpedos | Motor Int | Almacen [Barril] deriving Show
+data Barril = Comida | Oxigeno | Torpedo | Combustible deriving Show
+data Sector = S SectorId [Componente] [Tripulante] deriving Show
+type SectorId = String 
+type Tripulante = String 
+data Tree a = EmptyT | NodeT a (Tree a) (Tree a) deriving Show
+data Nave = N (Tree Sector) deriving Show
