@@ -2,6 +2,8 @@
 
 --Pizzas
 
+
+
 data Pizza = Prepizza | Capa Ingrediente Pizza deriving Show
 
 data Ingrediente = Salsa | Queso | Jamon | Aceitunas Int deriving Show
@@ -37,7 +39,7 @@ sacarJamon (Capa x p) = if esJamon x
 
 esJamon :: Ingrediente -> Bool
 esJamon Jamon = True
-esJamon _ = False    
+esJamon _ = False
 
 --4
 tieneSoloSalsaYQueso :: Pizza -> Bool
@@ -56,7 +58,7 @@ duplicarAceitunas :: Pizza -> Pizza
 duplicarAceitunas Prepizza = Prepizza
 duplicarAceitunas (Capa x p) = Capa (duplicarSiSonAceitunas x) (duplicarAceitunas p)
 
-duplicarSiSonAceitunas :: Ingrediente -> Ingrediente 
+duplicarSiSonAceitunas :: Ingrediente -> Ingrediente
 duplicarSiSonAceitunas (Aceitunas n) = Aceitunas (n*2)
 duplicarSiSonAceitunas i = i
 
@@ -95,7 +97,7 @@ hayTesoro :: Mapa -> Bool
 hayTesoro (Fin c) = hayTesoroEnElCofre c
 hayTesoro (Bifurcacion c m1 m2) = hayTesoroEnElCofre c || (hayTesoro m1 || hayTesoro m2)
 
-hayTesoroEnElCofre :: Cofre -> Bool 
+hayTesoroEnElCofre :: Cofre -> Bool
 hayTesoroEnElCofre (Cofre xs) = hayTesoroEntreLosObjetos xs
 
 hayTesoroEntreLosObjetos :: [Objeto] -> Bool
@@ -117,8 +119,8 @@ hayTesoroEn (x:xs) (Bifurcacion c m1 m2) = if esDerecha x
 
 esDerecha :: Dir -> Bool
 esDerecha Der = True
-esDerecha _ = False    
-   
+esDerecha _ = False
+
 
 --3
 caminoAlTesoro :: Mapa -> [Dir]
@@ -132,7 +134,7 @@ caminoAlTesoro (Bifurcacion c m1 m2) = if hayTesoro m1
 --4
 caminoDeLaRamaMasLarga :: Mapa -> [Dir]
 caminoDeLaRamaMasLarga (Fin c) = []
-caminoDeLaRamaMasLarga (Bifurcacion c m1 m2) = 
+caminoDeLaRamaMasLarga (Bifurcacion c m1 m2) =
     if longitud (caminoDeLaRamaMasLarga m1) > longitud (caminoDeLaRamaMasLarga m2)
         then Izq : caminoDeLaRamaMasLarga m1
         else Der : caminoDeLaRamaMasLarga m2
@@ -144,7 +146,7 @@ longitud (x:xs) = 1 + longitud xs
 --5
 tesorosPorNivel :: Mapa -> [[Objeto]]
 tesorosPorNivel (Fin c) = [tesorosDelCofre c]
-tesorosPorNivel (Bifurcacion c m1 m2) = 
+tesorosPorNivel (Bifurcacion c m1 m2) =
     tesorosDelCofre c : juntarNiveles (tesorosPorNivel m1) (tesorosPorNivel m2)
 
 juntarNiveles :: [[a]] -> [[a]] -> [[a]]
@@ -163,13 +165,13 @@ tesorosDelCofre (Cofre (x:xs)) = if esTesoro x
 --6
 todosLosCaminos :: Mapa -> [[Dir]]
 todosLosCaminos (Fin c) = []
-todosLosCaminos (Bifurcacion c m1 m2) = 
-    [Izq] : sucesionesDesde Izq (todosLosCaminos m1) ++ 
+todosLosCaminos (Bifurcacion c m1 m2) =
+    [Izq] : sucesionesDesde Izq (todosLosCaminos m1) ++
     [Der] : sucesionesDesde Der (todosLosCaminos m2)
 
 sucesionesDesde :: a -> [[a]] -> [[a]]
 sucesionesDesde x [] = []
-sucesionesDesde e (xs:xss) = [cons e xs] ++ sucesionesDesde e xss    
+sucesionesDesde e (xs:xss) = [cons e xs] ++ sucesionesDesde e xss
 
 cons :: a -> [a] -> [a]
 cons x [] = [x]
@@ -180,7 +182,141 @@ cons e (xs) = (e:xs)
 data Componente = LanzaTorpedos | Motor Int | Almacen [Barril] deriving Show
 data Barril = Comida | Oxigeno | Torpedo | Combustible deriving Show
 data Sector = S SectorId [Componente] [Tripulante] deriving Show
-type SectorId = String 
-type Tripulante = String 
+type SectorId = String
+type Tripulante = String
 data Tree a = EmptyT | NodeT a (Tree a) (Tree a) deriving Show
 data Nave = N (Tree Sector) deriving Show
+
+nave :: Nave
+nave = N (NodeT sector1 (NodeT sector2 EmptyT EmptyT)
+                        (NodeT sector3 EmptyT EmptyT))
+
+sector1 :: Sector
+sector1 = S "Sector 1" [(Motor 50), LanzaTorpedos] ["Nacho", "Ash"]
+
+sector2 :: Sector
+sector2 = S "Sector 2" [(Motor 100), (Almacen [Combustible, Oxigeno])] ["Spock"]
+
+sector3 :: Sector
+sector3 = S "Sector 3" [(Motor 100), (Almacen [Comida, Torpedo])] ["Luke", "Lando"]
+
+
+--1
+sectores :: Nave -> [SectorId]
+sectores (N EmptyT) = []
+sectores (N t) =
+    idDeSectores t
+
+idDeSector :: Sector -> SectorId
+idDeSector (S id c t) = id
+
+idDeSectores :: Tree Sector -> [SectorId]
+idDeSectores EmptyT = []
+idDeSectores (NodeT s1 s2 s3) =
+    idDeSector s1 : idDeSectores s2 ++ idDeSectores s3
+
+--2
+poderDePropulsion :: Nave -> Int
+poderDePropulsion (N EmptyT) = 0
+poderDePropulsion (N t) = poderDeSectores t
+
+poderDeSectores :: Tree Sector -> Int
+poderDeSectores EmptyT = 0
+poderDeSectores (NodeT s s2 s3) =
+    poderesDe (componentesDe s) +
+    poderDeSectores s2 +
+    poderDeSectores s3
+
+componentesDe :: Sector -> [Componente]
+componentesDe (S id c t) = c
+
+poderesDe :: [Componente] -> Int
+poderesDe [] = 0
+poderesDe (x:xs) = poderDe x + poderesDe xs
+
+poderDe :: Componente -> Int
+poderDe (Motor n) = n
+poderDe _ = 0
+
+--3
+barriles :: Nave -> [Barril]
+barriles (N EmptyT) = []
+barriles (N t) = barrilesDeSectores t
+
+barrilesDeSectores :: Tree Sector -> [Barril]
+barrilesDeSectores EmptyT = []
+barrilesDeSectores (NodeT s s2 s3) =
+    barrilesDeSector s ++ barrilesDeSectores s2 ++ barrilesDeSectores s3
+
+barrilesDeSector :: Sector -> [Barril]
+barrilesDeSector (S id c t) = barrilesDe c
+
+barrilesDe :: [Componente] -> [Barril]
+barrilesDe [] = []
+barrilesDe (x:xs) = objetosDe x ++ barrilesDe xs
+
+objetosDe :: Componente -> [Barril]
+objetosDe (Almacen b) = b
+objetosDe _ = []
+
+--4 
+agregarASector :: [Componente] -> SectorId -> Nave -> Nave
+agregarASector [] id n = n
+agregarASector xs id (N EmptyT) = N EmptyT
+agregarASector xs id (N t) = N (buscarYAgregar t id xs)
+
+
+buscarYAgregar :: Tree Sector -> SectorId -> [Componente] -> Tree Sector
+buscarYAgregar EmptyT _ _ = EmptyT
+buscarYAgregar (NodeT s s2 s3) id xs = if idDeSector s == id
+    then NodeT (agregarComponentes s xs) s2 s3
+    else NodeT s (buscarYAgregar s2 id xs) (buscarYAgregar s3 id xs)
+
+hayIdEn :: SectorId -> Tree Sector -> Bool
+hayIdEn _ EmptyT = False
+hayIdEn id (NodeT s s2 s3) = idDeSector s == id || hayIdEn id s2 || hayIdEn id s3
+
+agregarComponentes :: Sector -> [Componente] -> Sector
+agregarComponentes (S id c t) xs = S id (c ++ xs) t
+
+--5
+
+asignarTripulanteA :: Tripulante -> [SectorId] -> Nave -> Nave
+asignarTripulanteA  _ [] n = n
+asignarTripulanteA _ _ (N EmptyT) = N EmptyT
+asignarTripulanteA p xs (N t) = N (ingresarTripulante p xs t)
+
+ingresarTripulante :: Tripulante -> [SectorId] -> Tree Sector -> Tree Sector
+ingresarTripulante _ [] t = t
+ingresarTripulante _ _ EmptyT = EmptyT
+ingresarTripulante t xs (NodeT s s2 s3) = 
+    NodeT (ingresarSiCorresponde t xs s) (ingresarTripulante t xs s2) (ingresarTripulante t xs s3)
+
+ingresarSiCorresponde :: Tripulante -> [SectorId] -> Sector -> Sector
+ingresarSiCorresponde _ [] sec = sec
+ingresarSiCorresponde t (x:xs) s = if x == idDeSector s
+    then nuevoIngreso t s
+    else ingresarSiCorresponde t xs s
+
+nuevoIngreso :: Tripulante -> Sector -> Sector
+nuevoIngreso p (S id c t) = S id c (p:t)
+
+--6
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
