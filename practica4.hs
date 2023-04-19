@@ -191,14 +191,29 @@ nave :: Nave
 nave = N (NodeT sector1 (NodeT sector2 EmptyT EmptyT)
                         (NodeT sector3 EmptyT EmptyT))
 
+nacho :: Tripulante
+nacho = "Nacho"
+
+ash :: Tripulante
+ash = "Ash"
+
+spock :: Tripulante
+spock = "Spock"
+
+luke :: Tripulante
+luke = "Luke"
+
+leia :: Tripulante
+leia = "Leia"
+
 sector1 :: Sector
-sector1 = S "Sector 1" [(Motor 50), LanzaTorpedos] ["Nacho", "Ash"]
+sector1 = S "Sector 1" [(Motor 50), LanzaTorpedos] [nacho, ash]
 
 sector2 :: Sector
-sector2 = S "Sector 2" [(Motor 100), (Almacen [Combustible, Oxigeno])] ["Spock"]
+sector2 = S "Sector 2" [(Motor 100), (Almacen [Combustible, Oxigeno])] [nacho, spock]
 
 sector3 :: Sector
-sector3 = S "Sector 3" [(Motor 100), (Almacen [Comida, Torpedo])] ["Luke", "Lando"]
+sector3 = S "Sector 3" [(Motor 100), (Almacen [Comida, Torpedo])] [luke, leia]
 
 
 --1
@@ -302,7 +317,42 @@ nuevoIngreso :: Tripulante -> Sector -> Sector
 nuevoIngreso p (S id c t) = S id c (p:t)
 
 --6
+sectoresAsignados :: Tripulante -> Nave -> [SectorId]
+sectoresAsignados _ (N EmptyT) = []
+sectoresAsignados p (N t) = buscarAEn p t
 
+
+buscarAEn :: Tripulante -> Tree Sector -> [SectorId]
+buscarAEn _ EmptyT = []
+buscarAEn p (NodeT s s2 s3) = if tripulanteEstaEn p s
+    then idDeSector s : buscarAEn p s2 ++ buscarAEn p s3
+    else buscarAEn p s2 ++ buscarAEn p s3
+
+tripulanteEstaEn :: Tripulante -> Sector -> Bool
+tripulanteEstaEn p (S id c t) = pertenece p t
+
+pertenece :: Eq a => a -> [a] -> Bool
+pertenece e [] = False
+pertenece e (x:xs) = e == x || pertenece e xs
+
+--7
+tripulantes :: Nave -> [Tripulante]
+tripulantes (N EmptyT) = []
+tripulantes (N t) = sinRepetidos (tripulantesEn t)
+
+sinRepetidos :: Eq a => [a] -> [a]
+sinRepetidos [] = []
+sinRepetidos (x:xs) = if not (pertenece x xs)
+    then x:sinRepetidos xs
+    else sinRepetidos xs
+
+tripulantesEn :: Tree Sector -> [Tripulante]
+tripulantesEn EmptyT = []
+tripulantesEn (NodeT s s2 s3) = 
+    tripulantesDelSector s ++ tripulantesEn s2 ++ tripulantesEn s3
+
+tripulantesDelSector :: Sector -> [Tripulante]
+tripulantesDelSector (S id c t) = t    
 
 
 
