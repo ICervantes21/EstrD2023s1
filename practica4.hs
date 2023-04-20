@@ -1,6 +1,9 @@
+
 --Práctica 4
 
 --Pizzas
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use record patterns" #-}
 
 
 
@@ -304,7 +307,7 @@ asignarTripulanteA p xs (N t) = N (ingresarTripulante p xs t)
 ingresarTripulante :: Tripulante -> [SectorId] -> Tree Sector -> Tree Sector
 ingresarTripulante _ [] t = t
 ingresarTripulante _ _ EmptyT = EmptyT
-ingresarTripulante t xs (NodeT s s2 s3) = 
+ingresarTripulante t xs (NodeT s s2 s3) =
     NodeT (ingresarSiCorresponde t xs s) (ingresarTripulante t xs s2) (ingresarTripulante t xs s3)
 
 ingresarSiCorresponde :: Tripulante -> [SectorId] -> Sector -> Sector
@@ -348,20 +351,137 @@ sinRepetidos (x:xs) = if not (pertenece x xs)
 
 tripulantesEn :: Tree Sector -> [Tripulante]
 tripulantesEn EmptyT = []
-tripulantesEn (NodeT s s2 s3) = 
+tripulantesEn (NodeT s s2 s3) =
     tripulantesDelSector s ++ tripulantesEn s2 ++ tripulantesEn s3
 
 tripulantesDelSector :: Sector -> [Tripulante]
-tripulantesDelSector (S id c t) = t    
+tripulantesDelSector (S id c t) = t
 
 
 
 
+--Manada de lobos 
+
+type Presa = String -- nombre de presa
+type Territorio = String -- nombre de territorio
+type Nombre = String -- nombre de lobo
+data Lobo = Cazador Nombre [Presa] Lobo Lobo Lobo | Explorador Nombre [Territorio] Lobo Lobo | Cría Nombre deriving (Show, Eq)
+data Manada = M Lobo deriving Show
+
+--1
+cazador :: Lobo
+cazador = Cazador "hunter" ["conejo", "ratel"] exp1 cria1 exp2
+
+cazador2 :: Lobo
+cazador2 = Cazador "hunter2" ["conejo", "ratel"] exp1 cria1 cria2
+
+exp1 :: Lobo
+exp1 = Explorador "exp1" ["Norte", "Este", "Sur"] exp2 cazador2
+
+exp2 :: Lobo
+exp2 = Explorador "exp2" ["Sur", "Oeste"] cria1 cria2
+
+cria1 :: Lobo
+cria1 = Cría "cria1"
+
+cria2 :: Lobo
+cria2 = Cría "cria2"
+
+manada :: Manada
+manada = M cazador
+
+--2
+buenaCaza :: Manada -> Bool
+buenaCaza (M (Cría n)) = False
+buenaCaza (M (Explorador n t l1 l2)) = False
+buenaCaza (M (Cazador n c l1 l2 l3)) =
+    longitud c >= longitud (sinRepetidos (criasEn l1 ++ criasEn l2 ++ criasEn l3))
 
 
+criasEn :: Lobo -> [Lobo]
+criasEn (Cría n) = [Cría n]
+criasEn (Explorador n t l1 l2) = criasEn l1 ++ criasEn l2
+criasEn (Cazador n c l1 l2 l3) =
+    criasEn l1 ++ criasEn l2 ++ criasEn l3
 
 
+--3
+elAlfa :: Manada -> (Nombre, Int)
+elAlfa (M lobo) = buscarAlfa lobo
 
+buscarAlfa :: Lobo -> (Nombre, Int)
+buscarAlfa (Cría n) = (n, 0)
+buscarAlfa (Cazador n p l1 l2 l3) =
+    mejorCazador (n, longitud p)
+                 (mejorCazador (buscarAlfa l1)
+                 (mejorCazador (buscarAlfa l2) (buscarAlfa l3)))
+buscarAlfa (Explorador n _ l1 l2) =
+    mejorCazador (buscarAlfa l1) (buscarAlfa l2)
+
+mejorCazador :: (Nombre, Int) -> (Nombre, Int) -> (Nombre, Int)
+mejorCazador (x,y) (j,z) = if y >= z
+    then (x,y)
+    else (j,z)
+
+
+--4
+losQueExploraron :: Territorio -> Manada -> [Nombre]
+losQueExploraron t (M lobo) = buscarExploradores t lobo
+
+buscarExploradores :: Territorio -> Lobo -> [Nombre]
+buscarExploradores _ (Cría n) = []
+buscarExploradores t (Explorador n tr l1 l2) =
+    if pertenece t tr
+        then n : buscarExploradores t l1 ++ buscarExploradores t l2
+        else buscarExploradores t l1 ++ buscarExploradores t l2
+buscarExploradores t (Cazador _ _ l1 l2 l3) =
+    buscarExploradores t l1 ++ buscarExploradores t l2 ++ buscarExploradores t l3
+
+--5
+exploradoresPorTerritorio :: Manada -> [(Territorio, [Nombre])]
+exploradoresPorTerritorio m =
+    territoriosPorExploradores (sinRepetidos (territoriosDeLaManada m)) m
+
+territoriosPorExploradores :: [Territorio] -> Manada -> [(Territorio, [Nombre])]
+territoriosPorExploradores [] _ = []
+territoriosPorExploradores (x:xs) m =
+    (x, losQueExploraron x m) : territoriosPorExploradores xs m
+
+territoriosDeLaManada :: Manada -> [Territorio]
+territoriosDeLaManada (M lobo) = territoriosDe lobo
+
+territoriosDe :: Lobo -> [Territorio]
+territoriosDe (Cría _) = []
+territoriosDe (Explorador _ t l1 l2) =
+    t ++ territoriosDe l1 ++ territoriosDe l2
+territoriosDe (Cazador _ _ l1 l2 l3) =
+    territoriosDe l1 ++ territoriosDe l2 ++ territoriosDe l3
+
+--6
+superioresDelCazador :: Nombre -> Manada -> [Nombre]
+superioresDelCazador n (M lobo) = superioresDe n lobo
+
+superioresDe :: Nombre -> Lobo -> [Nombre]
+superioresDe _ (Cría _) = []
+superioresDe n (Cazador nm _ l1 l2 l3) = if hayCazadorLlamado n l1
+    then nm : superioresDe n l2 ++ superioresDe n l3
+    else superioresDe n l2 ++ superioresDe n l3
+superioresDe n (Explorador _ _ l1 l2) = superioresDe n l1 ++ superioresDe n l2
+
+esCazador :: Lobo -> Bool
+esCazador (Cazador _ _ _ _ _) = True
+esCazador _ = False
+
+hayCazadorLlamado :: Nombre -> Lobo -> Bool
+hayCazadorLlamado _ (Cría _) = False
+hayCazadorLlamado n (Explorador _ _ l1 l2) = hayCazadorLlamado n l1 || hayCazadorLlamado n l2
+hayCazadorLlamado n (Cazador n2 _ l1 l2 l3 ) = 
+    n == n2 || hayCazadorLlamado n l1 || hayCazadorLlamado n l2 || hayCazadorLlamado n l3
+    
+nombreDelLobo :: Lobo -> Nombre
+nombreDelLobo (Cría n) = n
+nombreDelLobo (Explorador n _ _ _) = n
+nombreDelLobo (Cazador n _ _ _ _) = n
 
 
 
