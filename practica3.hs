@@ -184,20 +184,11 @@ aparicionesT y (NodeT x t1 t2) = if y == x
 
 
 --6
-leaves :: Tree a -> [a] --La había realizado sin querer, se llama "elementosDeARbol"
+leaves :: Tree a -> [a] 
 leaves EmptyT = []
 leaves (NodeT a EmptyT EmptyT) = [a]
-leaves (NodeT a t1 t2) = if not (esHoja t1)
-    then leaves t1 ++ leaves t2
-    else elementoDelArbol t1 : leaves t2
+leaves (NodeT a t1 t2) = leaves t1 ++ leaves t2
 
-elementoDelArbol :: Tree a -> a
-elementoDelArbol (NodeT a t1 t2) = a
-elementoDelArbol _ = error ""
-
-esHoja :: Tree a -> Bool
-esHoja (NodeT a EmptyT EmptyT) = True
-esHoja _ = False
 
 --7
 heightT :: Tree a -> Int
