@@ -22,3 +22,21 @@ sinRepetidos xs = setToList (nuevoSet xs)
 nuevoSet ::Eq a => [a] -> Set a
 nuevoSet [] = emptyS
 nuevoSet (x:xs) = addS x (nuevoSet xs)
+
+unirTodos :: Eq a => Tree (Set a) -> Set a
+unirTodos EmptyT = emptyS
+unirTodos (NodeT s t1 t2) = unionS (unionS (nuevoSet (setToList s)) (unirTodos t1)) (unionS (nuevoSet (setToList s)) (unirTodos t2))
+
+data Tree a = EmptyT | NodeT a (Tree a) (Tree a) deriving Show
+
+arbol :: Tree (Set Int)
+arbol = NodeT set1
+                  (NodeT set1
+                          (NodeT set1
+                                   (NodeT set1 EmptyT EmptyT)
+                                   (NodeT set1 EmptyT EmptyT))
+                            EmptyT)
+                  (NodeT set1
+                          (NodeT set1 EmptyT EmptyT)
+                          (NodeT set1 EmptyT (
+                                           NodeT set1 EmptyT EmptyT))) 
